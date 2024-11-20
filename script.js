@@ -185,22 +185,29 @@ try {
       });
 
       // 在生成点数据后，添加力导向模拟
-      const simulation = d3.forceSimulation(points)
-        .force("x", d3.forceX(d => projection(d.geometry.coordinates)[0]).strength(0.2))
-        .force("y", d3.forceY(d => projection(d.geometry.coordinates)[1]).strength(0.2))
+      const simulation = d3
+        .forceSimulation(points)
+        .force(
+          "x",
+          d3.forceX((d) => projection(d.geometry.coordinates)[0]).strength(0.2)
+        )
+        .force(
+          "y",
+          d3.forceY((d) => projection(d.geometry.coordinates)[1]).strength(0.2)
+        )
         .force("collide", d3.forceCollide().radius(16).strength(0.5))
         .force("charge", d3.forceManyBody().strength(5))
         .stop()
         .tick(50); // 运行50次迭代
 
       // 创建热力图层
-      const heatmapData = d3.contourDensity()
-        .x(d => projection(d.geometry.coordinates)[0])
-        .y(d => projection(d.geometry.coordinates)[1])
+      const heatmapData = d3
+        .contourDensity()
+        .x((d) => projection(d.geometry.coordinates)[0])
+        .y((d) => projection(d.geometry.coordinates)[1])
         .size([width, height])
         .bandwidth(80)
-        .thresholds(30)
-        (points);
+        .thresholds(30)(points);
 
       // 绘制热力图
       g.selectAll("path.heat")
@@ -210,7 +217,7 @@ try {
         .attr("class", "heat")
         .attr("d", d3.geoPath())
         .style("fill", "url(#heatGradient)")
-        .style("opacity", d => Math.pow(d.value, 0.5) * 6)
+        .style("opacity", (d) => Math.pow(d.value, 0.5) * 6)
         .style("mix-blend-mode", "screen");
 
       // 修改点的绘制，使其更小且更透明
@@ -218,31 +225,27 @@ try {
         .data(points)
         .enter()
         .append("circle")
-        .attr("cx", d => projection(d.geometry.coordinates)[0])
-        .attr("cy", d => projection(d.geometry.coordinates)[1])
+        .attr("cx", (d) => projection(d.geometry.coordinates)[0])
+        .attr("cy", (d) => projection(d.geometry.coordinates)[1])
         .attr("r", 8)
         .style("fill", "#9300ff")
         .style("opacity", 0.15)
         .style("mix-blend-mode", "screen")
-        .on("mouseover", function(event, d) {
+        .on("mouseover", function (event, d) {
           const circle = d3.select(this);
           const circleBox = circle.node().getBoundingClientRect();
           const circleX = circleBox.left + circleBox.width / 2;
           const circleY = circleBox.top + circleBox.height / 2;
 
           // 更新点的样式
-          circle
-            .transition()
-            .duration(200)
-            .attr("r", 12)
-            .style("opacity", 0.3);
+          circle.transition().duration(200).attr("r", 12).style("opacity", 0.3);
 
           // 更新信息窗口内容
           d3.select(".info-window")
             .style("opacity", "1")
             .select(".stat-value")
             .text(d.properties.value.toFixed(2));
-          
+
           d3.select(".info-window")
             .select(".stat-label")
             .text(d.properties.borough);
@@ -253,7 +256,7 @@ try {
           const windowX = infoRect.left + infoRect.width / 2;
           const windowY = infoRect.bottom;
 
-          // 检查点是否在窗口上方
+          // 检查点是否在窗口���方
           if (circleY < windowY) {
             // 点在窗口上方，只显示直线
             verticalLine.style("opacity", 0);
@@ -286,17 +289,31 @@ try {
               .style("opacity", 0.5);
           }
         })
-        .on("mouseout", function() {
+        .on("mouseout", function () {
           d3.select(this)
             .transition()
             .duration(200)
             .attr("r", 8)
             .style("opacity", 0.15);
-          
-          // 隐藏信息窗口和连接线
-          d3.select(".info-window").style("opacity", "0");
-          verticalLine.style("opacity", 0);
-          connectingLine.style("opacity", 0);
+
+          // 延迟隐藏信息窗口和连接线
+          d3.select(".info-window")
+            .transition()
+            .delay(1000) // 添加1秒延迟
+            .duration(500) // 增加淡出时间
+            .style("opacity", "0");
+
+          verticalLine
+            .transition()
+            .delay(1000) // 匹配窗口延迟
+            .duration(500)
+            .style("opacity", 0);
+
+          connectingLine
+            .transition()
+            .delay(1000) // 匹配窗口延迟
+            .duration(500)
+            .style("opacity", 0);
         });
 
       // 创建两个独立的SVG层用于连接线
