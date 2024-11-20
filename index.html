@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Nomad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="menu">
+        <h1>Data Nomad</h1>
+        <ul class="menu-list">
+            <li class="menu-item active">Population Density</li>
+            <li class="menu-item">Crime Rate</li>
+            <li class="menu-item">Income Level</li>
+            <li class="menu-item">Housing Price</li>
+            <li class="menu-item">Transit Usage</li>
+        </ul>
+    </div>
+    <div class="info-window">
+        <div class="info-content">
+            <h2>Data Overview</h2>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Points</span>
+                    <span class="stat-value">500</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Area Coverage</span>
+                    <span class="stat-value">Manhattan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="container">
+        <div id="map"></div>
+        <div id="debug-info">
+            <h3>Debug Info</h3>
+        </div>
+        <select class="dataset-select">
+            <option value="nyc_central">NYC_Central(Test)</option>
+        </select>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

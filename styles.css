@@ -1,0 +1,433 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Anonymous Pro", monospace;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+#container {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  border: none;
+  background: #1a1a1a;
+  display: block;
+}
+
+.borough {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: all 0.3s ease;
+}
+
+.borough:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  padding: 10px;
+  background: rgba(26, 26, 26, 0.95);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: "Anonymous Pro", monospace;
+  pointer-events: none;
+  border: 1px solid rgba(147, 0, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(147, 0, 255, 0.2);
+}
+
+#debug-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(26, 26, 26, 0.9);
+  color: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(147, 0, 255, 0.3);
+  max-width: 300px;
+}
+
+.zoom-controls {
+  background: rgba(26, 26, 26, 0.9);
+  border-radius: 4px;
+  padding: 5px;
+  box-shadow: 0 2px 8px rgba(147, 0, 255, 0.3);
+}
+
+.zoom-button {
+  display: block;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  border: 1px solid #9300ff;
+  border-radius: 4px;
+  background: rgba(26, 26, 26, 0.9);
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.zoom-button:hover {
+  background: rgba(147, 0, 255, 0.2);
+}
+
+.zoom-button:active {
+  background: rgba(147, 0, 255, 0.4);
+}
+
+.data-point {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  filter: drop-shadow(0 0 4px rgba(147, 0, 255, 0.5));
+}
+
+.data-point:hover {
+  filter: drop-shadow(0 0 8px rgba(147, 0, 255, 0.8));
+}
+
+.legend {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(26, 26, 26, 0.9);
+  color: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(147, 0, 255, 0.3);
+}
+
+.menu {
+  position: fixed;
+  top: 40px;
+  left: 40px;
+  z-index: 1000;
+}
+
+.menu h1 {
+  color: #9300ff;
+  font-size: clamp(24px, 4vw, 36px);
+  margin: 0 0 20px 0;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-family: "Anonymous Pro", monospace;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 12px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: clamp(16px, 2vw, 20px);
+  letter-spacing: 1px;
+  font-family: "Anonymous Pro", monospace;
+}
+
+.menu-item:hover {
+  color: #9300ff;
+}
+
+.menu-item.active {
+  color: #9300ff;
+}
+
+#menu {
+  display: none;
+}
+
+.dataset-select {
+  position: fixed;
+  bottom: clamp(20px, 4vh, 40px);
+  right: clamp(20px, 4vw, 40px);
+  background: rgba(26, 26, 26, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(147, 0, 255, 0.3);
+  padding: 10px 15px;
+  font-family: "Anonymous Pro", monospace;
+  font-size: clamp(14px, 1.5vw, 16px);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.dataset-select:hover {
+  border-color: #9300ff;
+  color: #9300ff;
+  background: rgba(26, 26, 26, 0.4);
+  box-shadow: 0 8px 12px rgba(147, 0, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.dataset-select option {
+  background: rgba(26, 26, 26, 0.95);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+}
+
+.dataset-select::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border-radius: 9px;
+  background: linear-gradient(
+    45deg,
+    rgba(147, 0, 255, 0.3),
+    transparent,
+    rgba(147, 0, 255, 0.3)
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+.info-window {
+  position: absolute;
+  top: 40px;
+  left: clamp(300px, 25vw, 350px);
+  width: clamp(250px, 20vw, 300px);
+  background: rgba(26, 26, 26, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(147, 0, 255, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: "Anonymous Pro", monospace;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 900;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.info-window h2 {
+  color: #9300ff;
+  font-size: 24px;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(147, 0, 255, 0.2);
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+}
+
+.stat-value {
+  color: #9300ff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.info-window::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border-radius: 9px;
+  background: linear-gradient(
+    45deg,
+    rgba(147, 0, 255, 0.3),
+    transparent,
+    rgba(147, 0, 255, 0.3)
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+.connection-line {
+  position: absolute;
+  pointer-events: none;
+  z-index: 899;
+}
+
+@media screen and (max-width: 1200px) {
+  .menu h1 {
+    font-size: 30px;
+  }
+
+  .menu-item {
+    font-size: 18px;
+  }
+
+  .info-window {
+    left: 280px;
+    width: 250px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .menu {
+    top: 20px;
+    left: 20px;
+  }
+
+  .menu h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  .menu-item {
+    font-size: 16px;
+    padding: 8px 0;
+  }
+
+  .info-window {
+    left: 250px;
+    width: 220px;
+    padding: 15px;
+  }
+
+  .dataset-select {
+    bottom: 20px;
+    right: 20px;
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .menu h1 {
+    font-size: 20px;
+  }
+
+  .menu-item {
+    font-size: 14px;
+  }
+
+  .info-window {
+    left: 200px;
+    width: 180px;
+    padding: 12px;
+  }
+}
+
+@media screen and (min-resolution: 192dpi) {
+  .info-window {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .connection-line {
+    filter: drop-shadow(0 0 10px rgba(147, 0, 255, 0.9));
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body,
+  #map {
+    background: #1a1a1a;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media print {
+  .menu,
+  .info-window,
+  .dataset-select,
+  .connection-line {
+    display: none;
+  }
+}
+
+/* 修改高视口断点 */
+@media screen and (min-height: 800px) {
+  #container {
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+
+  #map {
+    height: 100vh;
+    max-height: none;
+  }
+
+  /* 保持菜单在左上角 */
+  .menu {
+    position: fixed; /* 改回 fixed */
+    top: 40px; /* 保持原来的顶部位置 */
+    left: 40px; /* 保持原来的左侧位置 */
+    transform: none; /* 移除 transform */
+  }
+
+  /* 保持信息窗口在左上角 */
+  .info-window {
+    position: fixed; /* 改为 fixed */
+    top: 40px; /* 保持原来的顶部位置 */
+    left: 350px; /* 保持原来的左侧位置 */
+    transform: none; /* 移除 transform */
+  }
+
+  /* 保持下拉菜单在右下角 */
+  .dataset-select {
+    position: fixed;
+    bottom: clamp(20px, 4vh, 40px);
+    right: clamp(20px, 4vw, 40px);
+    transform: none;
+    top: auto;
+  }
+
+  #debug-info {
+    position: absolute;
+    bottom: 5vh;
+  }
+}
+
+/* 更高的视口 */
+@media screen and (min-height: 1200px) {
+  #map {
+    height: 900px;
+  }
+}
