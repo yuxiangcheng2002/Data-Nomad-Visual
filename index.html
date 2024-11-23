@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="loading-screen" style="
+    <!-- 注释掉加载页面 -->
+    <!-- <div id="loading-screen" style="
       position: fixed;
       top: 0;
       left: 0;
@@ -56,7 +57,7 @@
         <span class="dot" style="animation-delay: 0.2s">.</span>
         <span class="dot" style="animation-delay: 0.4s">.</span>
       </div>
-    </div>
+    </div> -->
     <div class="menu">
         <h1>Data Nomad</h1>
         <ul class="menu-list">
@@ -69,29 +70,31 @@
     </div>
     <div class="info-window">
         <div class="info-content">
-            <h2>Data Overview</h2>
             <div class="stats">
                 <div class="stat-item">
-                    <span class="stat-label">Total Points</span>
-                    <span class="stat-value">500</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Area Coverage</span>
-                    <span class="stat-value">Manhattan</span>
+                    <span class="stat-label"></span>
+                    <span class="stat-value"></span>
                 </div>
             </div>
         </div>
     </div>
+    <div class="time-window">
+        <div class="date-time-row">
+            <input type="date" id="date-picker">
+            <div class="time-display">00:00</div>
+        </div>
+        <div class="time-control">
+            <input type="range" id="time-slider" min="0" max="1439" step="1">
+        </div>
+    </div>
     <div id="container">
         <div id="map"></div>
-        <div id="debug-info">
-            <h3>Debug Info</h3>
-        </div>
         <select class="dataset-select">
             <option value="nyc_central">NYC_Central(Test)</option>
         </select>
     </div>
-    <style>
+    <!-- 注释掉加载动画样式 -->
+    <!-- <style>
     @keyframes loadingDot {
       0%, 100% { 
         opacity: 0.2;
@@ -107,7 +110,7 @@
       display: inline-block;
       animation: loadingDot 1.4s infinite ease-in-out;
     }
-    </style>
+    </style> -->
     <script src="script.js"></script>
 </body>
 </html>

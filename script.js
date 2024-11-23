@@ -1,14 +1,127 @@
-// Add debugging information
-console.log("Script loading started...");
-
 // Set map dimensions
 const width = window.innerWidth;
 const height = window.innerHeight;
 const margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-let loadingScreen = document.getElementById("loading-screen");
+// 注释掉加载页面变量声明
+// let loadingScreen = document.getElementById("loading-screen");
+
+// 在文件顶部添加全局时间控制变量
+const timeControl = {
+  currentDate: new Date(),
+  selectedDate: new Date(),
+  selectedMinutes: 0,
+  isCurrentDate: true,
+
+  initialize() {
+    // 设置日期选择器
+    const datePicker = document.getElementById("date-picker");
+    const today = new Date();
+    const dateStr = today.toISOString().split("T")[0];
+    datePicker.value = dateStr;
+    datePicker.max = dateStr;
+
+    // 设置时间滑块
+    const timeSlider = document.getElementById("time-slider");
+    const currentMinutes = today.getHours() * 60 + today.getMinutes();
+    timeSlider.value = currentMinutes;
+    this.selectedMinutes = currentMinutes;
+
+    // 更新时间显示
+    this.updateTimeDisplay();
+
+    // 添加事件监听器
+    datePicker.addEventListener("change", (e) => {
+      const selectedDate = new Date(e.target.value);
+      this.selectedDate = selectedDate;
+      this.isCurrentDate = this.checkIfCurrentDate();
+      this.updateTimeStatus();
+      this.updateSliderConstraints();
+    });
+
+    timeSlider.addEventListener("input", (e) => {
+      const newValue = parseInt(e.target.value);
+      if (this.isCurrentDate) {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        if (newValue > currentMinutes) {
+          timeSlider.value = currentMinutes;
+          this.selectedMinutes = currentMinutes;
+        } else {
+          this.selectedMinutes = newValue;
+        }
+      } else {
+        this.selectedMinutes = newValue;
+      }
+      this.updateTimeDisplay();
+    });
+
+    // 如果是当前日期，启动实时更新
+    if (this.isCurrentDate) {
+      this.startRealtimeUpdate();
+    }
+  },
+
+  checkIfCurrentDate() {
+    const today = new Date();
+    return this.selectedDate.toDateString() === today.toDateString();
+  },
+
+  updateTimeStatus() {
+    const statusElement = document.querySelector(".time-status");
+    statusElement.textContent = this.isCurrentDate ? "CURRENT" : "PAST";
+    statusElement.className =
+      "time-status " + (this.isCurrentDate ? "current" : "past");
+  },
+
+  updateTimeDisplay() {
+    const hours = Math.floor(this.selectedMinutes / 60);
+    const minutes = this.selectedMinutes % 60;
+    const timeStr = `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+    document.querySelector(".time-display").textContent = timeStr;
+
+    // 添加对点的更新
+    this.updatePointsVisibility();
+  },
+
+  updatePointsVisibility() {
+    d3.selectAll("circle").style("display", (d) => {
+      const pointMinutes =
+        d.properties.timestamp.getHours() * 60 +
+        d.properties.timestamp.getMinutes();
+      return pointMinutes <= this.selectedMinutes ? null : "none";
+    });
+  },
+
+  updateSliderConstraints() {
+    const timeSlider = document.getElementById("time-slider");
+    if (this.isCurrentDate) {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      if (this.selectedMinutes > currentMinutes) {
+        timeSlider.value = currentMinutes;
+        this.selectedMinutes = currentMinutes;
+        this.updateTimeDisplay();
+      }
+    }
+    timeSlider.max = 1439; // 23:59
+  },
+
+  startRealtimeUpdate() {
+    setInterval(() => {
+      if (this.isCurrentDate) {
+        this.updateSliderConstraints();
+      }
+    }, 1000); // 每秒更新一次
+  },
+};
 
 try {
+  // 初始化时间控制
+  timeControl.initialize();
+
   // Create SVG container
   const svg = d3
     .select("#map")
@@ -37,13 +150,9 @@ try {
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-  console.log("Loading geographic data...");
-
   // Load local GeoJSON file
   d3.json("new-york-city-boroughs.geojson")
     .then(function (nyc) {
-      console.log("Geographic data loaded successfully", nyc);
-
       // Define point color
       const pointColor = "#9300ff";
 
@@ -143,7 +252,7 @@ try {
         .style("filter", "url(#glow)");
 
       // 然后是热力图和点的绘制
-      // ... 其余代码保持不变 ...
+      // ... 其余代保持不变 ...
 
       // 绘制热力图
       g.selectAll("path.heat")
@@ -178,18 +287,33 @@ try {
           circle.transition().duration(200).attr("r", 12).style("opacity", 0.3);
 
           // 更新信息窗口内容
-          d3.select(".info-window")
+          const infoWindow = d3.select(".info-window");
+
+          // 清除之前的过渡效果
+          infoWindow.interrupt();
+
+          // 设置内容和显示
+          infoWindow
             .style("opacity", "1")
             .select(".stat-value")
             .text(d.properties.value.toFixed(2));
 
-          d3.select(".info-window")
-            .select(".stat-label")
-            .text(d.properties.borough);
+          infoWindow.select(".stat-label").text(d.properties.borough);
 
-          // 获取信息窗口位置
-          const infoWindow = document.querySelector(".info-window");
-          const infoRect = infoWindow.getBoundingClientRect();
+          // 显示新的属性
+          infoWindow.selectAll("p").remove(); // 先清除已有的 p 元素
+
+          infoWindow
+            .append("p")
+            .text(`Timestamp: ${d.properties.timestamp.toLocaleTimeString()}`);
+
+          infoWindow
+            .append("p")
+            .text(`Sensor1: ${d.properties.sensor1.toFixed(2)}`);
+
+          // 修复获取信息窗口位置的代码
+          const infoWindow_el = document.querySelector(".info-window");
+          const infoRect = infoWindow_el.getBoundingClientRect();
           const windowX = infoRect.left + infoRect.width / 2;
           const windowY = infoRect.bottom;
 
@@ -232,16 +356,21 @@ try {
             .attr("r", 8)
             .style("opacity", 0.15);
 
-          // 延迟隐藏信息窗口，但立即隐藏连接线
-          d3.select(".info-window")
-            .transition()
-            .delay(1000)
-            .duration(500)
-            .style("opacity", "0");
-
-          // 立即隐藏连接线，不使用过渡
+          // 立即隐藏连接线
           verticalLine.style("opacity", 0);
           connectingLine.style("opacity", 0);
+
+          // 只在鼠标真正离开时才淡出信息窗口
+          const infoWindow = d3.select(".info-window");
+          infoWindow
+            .transition()
+            .duration(500)
+            .style("opacity", "0")
+            .end() // 等待过渡完成
+            .then(() => {
+              // 过渡完成后清除内容
+              infoWindow.selectAll("p").remove();
+            });
         });
 
       // 创建两个独立SVG层用于连接线
@@ -284,30 +413,25 @@ try {
         .style("opacity", 0)
         .style("filter", "drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))");
 
-      console.log("Map rendering complete");
-      document.getElementById(
-        "debug-info"
-      ).innerHTML += `<p>Successfully rendered ${nyc.features.length} areas</p>`;
-
-      // 添加淡出动画
-      setTimeout(() => {
-        loadingScreen.style.opacity = "0";
-        setTimeout(() => {
-          loadingScreen.style.display = "none";
-        }, 1000); // 等待淡出动画完成后隐藏元素
-      }, 500); // 延迟500ms开始淡出
+      // 注释掉加载页面的淡出动画
+      // setTimeout(() => {
+      //   loadingScreen.style.opacity = "0";
+      //   setTimeout(() => {
+      //     loadingScreen.style.display = "none";
+      //   }, 1000); // 等待淡出动画完成后隐藏元素
+      // }, 500); // 延迟500ms开始淡出
     })
     .catch(function (error) {
-      console.error("Error loading data:", error);
-      document.getElementById(
-        "debug-info"
-      ).innerHTML += `<p style="color: red;">Data loading error: ${error.message}</p>`;
+      // console.error("Error loading data:", error);
+      // document.getElementById(
+      //   "debug-info"
+      // ).innerHTML += `<p style="color: red;">Data loading error: ${error.message}</p>`;
     });
 } catch (error) {
-  console.error("Execution error:", error);
-  document.getElementById(
-    "debug-info"
-  ).innerHTML += `<p style="color: red;">Execution error: ${error.message}</p>`;
+  // console.error("Execution error:", error);
+  // document.getElementById(
+  //   "debug-info"
+  // ).innerHTML += `<p style="color: red;">Execution error: ${error.message}</p>`;
 }
 
 // Add the PointSimulation class definition at the top of script.js
@@ -321,6 +445,8 @@ class PointSimulation {
 
   generatePoints(features) {
     const points = [];
+    const startTime = new Date();
+    startTime.setHours(0, 0, 0, 0); // 设置为当天的开始时间
 
     features.forEach((feature) => {
       const bounds = d3.geoBounds(feature);
@@ -360,11 +486,20 @@ class PointSimulation {
         }
 
         if (d3.geoContains(feature, point)) {
+          // 生成随机时间，但确保是递增的
+          const randomMinutes = Math.floor(Math.random() * 1440); // 一天有1440分钟
+          const timestamp = new Date(
+            startTime.getTime() + randomMinutes * 60000
+          );
+          const sensor1 = Math.random() * 100;
+
           points.push({
             type: "Feature",
             properties: {
               borough: feature.properties.name,
               value: Math.random() * 100,
+              timestamp: timestamp,
+              sensor1: sensor1,
             },
             geometry: {
               type: "Point",
@@ -375,6 +510,11 @@ class PointSimulation {
         }
       }
     });
+
+    // 初始化时立即更新点的可见性
+    setTimeout(() => {
+      timeControl.updatePointsVisibility();
+    }, 0);
 
     return points;
   }
