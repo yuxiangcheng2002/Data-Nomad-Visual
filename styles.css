@@ -651,3 +651,35 @@ body {
   text-shadow: 0 0 0.5em rgba(147, 0, 255, 0.5);
   letter-spacing: 0.05em;
 }
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    width: 100%;
+}
+
+#play-button {
+    background: transparent;
+    border: 1px solid #9300ff;
+    color: #9300ff;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+#play-button:hover {
+    background: rgba(147, 0, 255, 0.2);
+    box-shadow: 0 0 1em rgba(147, 0, 255, 0.5);
+}
+
+#play-button.playing {
+    background: #9300ff;
+    color: white;
+}

@@ -1,4 +1,3 @@
-// 点的生成和模拟相关函数
 class PointSimulation {
   constructor(projection, width, height) {
     this.projection = projection;
@@ -7,7 +6,6 @@ class PointSimulation {
     this.pointsPerBorough = 400;
   }
 
-  // 生成点数据
   generatePoints(features) {
     const points = [];
     
@@ -15,7 +13,6 @@ class PointSimulation {
       const bounds = d3.geoBounds(feature);
       let validPoints = 0;
 
-      // 检查是否是曼哈顿或布鲁克林
       const isManhattan = feature.properties.name === "Manhattan";
       const isBrooklyn = feature.properties.name === "Brooklyn";
       
@@ -23,21 +20,18 @@ class PointSimulation {
         let point;
         
         if (isManhattan) {
-          // 对曼哈顿使用特殊的点生成逻辑（更多点在下部）
-          const yBias = Math.pow(Math.random(), 2); // 使用平方来增加下部的概率
+          const yBias = Math.pow(Math.random(), 2);
           point = [
             bounds[0][0] + Math.random() * (bounds[1][0] - bounds[0][0]),
             bounds[0][1] + yBias * (bounds[1][1] - bounds[0][1])
           ];
         } else if (isBrooklyn) {
-          // 对布鲁克林使用相反的逻辑（更多点在上部）
-          const yBias = 1 - Math.pow(Math.random(), 2); // 使用反向平方来增加上部的概率
+          const yBias = 1 - Math.pow(Math.random(), 2);
           point = [
             bounds[0][0] + Math.random() * (bounds[1][0] - bounds[0][0]),
             bounds[0][1] + yBias * (bounds[1][1] - bounds[0][1])
           ];
         } else {
-          // 其他区域使用普通的随机分布
           point = [
             bounds[0][0] + Math.random() * (bounds[1][0] - bounds[0][0]),
             bounds[0][1] + Math.random() * (bounds[1][1] - bounds[0][1])
@@ -64,7 +58,6 @@ class PointSimulation {
     return points;
   }
 
-  // 创建热力图数据
   createHeatmapData(points) {
     return d3.contourDensity()
       .x(d => this.projection(d.geometry.coordinates)[0])
@@ -76,7 +69,6 @@ class PointSimulation {
       (points);
   }
 
-  // 创建热力图渐变
   createHeatGradient(defs) {
     const heatGradient = defs
       .append("linearGradient")
@@ -115,7 +107,6 @@ class PointSimulation {
     return heatGradient;
   }
 
-  // 应用力导向模拟
   applyForceSimulation(points) {
     return d3.forceSimulation(points)
       .force("x", d3.forceX(d => this.projection(d.geometry.coordinates)[0]).strength(0.1))
