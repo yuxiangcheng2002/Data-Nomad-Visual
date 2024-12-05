@@ -15,51 +15,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- <div id="loading-screen" style="
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 99999;
-      transition: opacity 1s ease-out;
-      padding: 0;
-      margin: 0;
-      overflow: hidden;">
-      <div style="
-        color: #9300ff; 
-        font-size: clamp(12px, 1.8vw, 20px);
-        margin-bottom: clamp(12px, 2vw, 24px);
-        font-style: italic;
-        max-width: min(600px, 80vw);
-        text-align: center;
-        line-height: 1.8;
-        filter: drop-shadow(0 0 8px rgba(147, 0, 255, 0.8)) 
-                drop-shadow(0 0 20px rgba(147, 0, 255, 0.4));">
-        Le nomade se distribue<br>
-        dans un espace lisse,<br>
-        il occupe, il habite,<br>
-        il tient cet espace,<br>
-        et c'est là son<br>
-        principe territorial.
-      </div>
-      <div class="loading-dots" style="
-        color: #9300ff;
-        font-size: clamp(24px, 4vw, 48px);
-        letter-spacing: clamp(6px, 1.2vw, 12px);
-        filter: drop-shadow(0 0 8px rgba(147, 0, 255, 0.8));">
-        <span class="dot" style="animation-delay: 0s">.</span>
-        <span class="dot" style="animation-delay: 0.2s">.</span>
-        <span class="dot" style="animation-delay: 0.4s">.</span>
-      </div>
-    </div> -->
+    <div id="loading-screen">
+        <div class="loading-quote">
+            Le nomade se distribue<br>
+            dans un espace lisse,<br>
+            il occupe, il habite,<br>
+            il tient cet espace,<br>
+            et c'est là son<br>
+            principe territorial.
+        </div>
+        <div class="loading-dots">
+            <span class="dot" style="animation-delay: 0s">.</span>
+            <span class="dot" style="animation-delay: 0.2s">.</span>
+            <span class="dot" style="animation-delay: 0.4s">.</span>
+        </div>
+    </div>
     <div class="menu">
         <h1>Data Nomad</h1>
         <ul class="menu-list">
@@ -98,23 +68,6 @@
             <option value="nyc_central">NYC_Central(Test)</option>
         </select>
     </div>
-    <!-- <style>
-    @keyframes loadingDot {
-      0%, 100% { 
-        opacity: 0.2;
-        transform: translateX(-50%);
-      }
-      50% { 
-        opacity: 1;
-        transform: translateX(50%);
-      }
-    }
-
-    .loading-dots .dot {
-      display: inline-block;
-      animation: loadingDot 1.4s infinite ease-in-out;
-    }
-    </style> -->
     <script src="script.js"></script>
 </body>
 </html>

@@ -248,233 +248,251 @@ try {
 
   const path = d3.geoPath().projection(projection);
 
-  d3.json("new-york-city-boroughs.geojson").then(function (nyc) {
-    // Create defs and filters
-    const defs = svg.append("defs");
+  // Load local GeoJSON file
+  d3.json("new-york-city-boroughs.geojson")
+    .then(function (nyc) {
+      // Create defs and filters
+      const defs = svg.append("defs");
 
-    const filter = defs
-      .append("filter")
-      .attr("id", "glow")
-      .attr("x", "-100%")
-      .attr("y", "-100%")
-      .attr("width", "300%")
-      .attr("height", "300%");
+      const filter = defs
+        .append("filter")
+        .attr("id", "glow")
+        .attr("x", "-100%")
+        .attr("y", "-100%")
+        .attr("width", "300%")
+        .attr("height", "300%");
 
-    filter
-      .append("feGaussianBlur")
-      .attr("stdDeviation", "8")
-      .attr("result", "coloredBlur");
+      filter
+        .append("feGaussianBlur")
+        .attr("stdDeviation", "8")
+        .attr("result", "coloredBlur");
 
-    filter
-      .append("feColorMatrix")
-      .attr("type", "matrix")
-      .attr(
-        "values",
-        `
-          2 0 0 0 0.8
-          0 2 0 0 0
-          0 0 2 0 1.2
-          0 0 0 2 0
-        `
-      );
+      filter
+        .append("feColorMatrix")
+        .attr("type", "matrix")
+        .attr(
+          "values",
+          `
+            2 0 0 0 0.8
+            0 2 0 0 0
+            0 0 2 0 1.2
+            0 0 0 2 0
+          `
+        );
 
-    filter
-      .append("feComponentTransfer")
-      .append("feFuncA")
-      .attr("type", "linear")
-      .attr("slope", "1.5");
+      filter
+        .append("feComponentTransfer")
+        .append("feFuncA")
+        .attr("type", "linear")
+        .attr("slope", "1.5");
 
-    filter
-      .append("feComponentTransfer")
-      .append("feFuncR")
-      .attr("type", "linear")
-      .attr("slope", "1.5");
+      filter
+        .append("feComponentTransfer")
+        .append("feFuncR")
+        .attr("type", "linear")
+        .attr("slope", "1.5");
 
-    const feMerge = filter.append("feMerge");
-    feMerge.append("feMergeNode").attr("in", "coloredBlur");
-    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+      const feMerge = filter.append("feMerge");
+      feMerge.append("feMergeNode").attr("in", "coloredBlur");
+      feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
-    const mergeFilter = defs
-      .append("filter")
-      .attr("id", "merge")
-      .attr("x", "-50%")
-      .attr("y", "-50%")
-      .attr("width", "200%")
-      .attr("height", "200%");
+      const mergeFilter = defs
+        .append("filter")
+        .attr("id", "merge")
+        .attr("x", "-50%")
+        .attr("y", "-50%")
+        .attr("width", "200%")
+        .attr("height", "200%");
 
-    mergeFilter
-      .append("feGaussianBlur")
-      .attr("in", "SourceGraphic")
-      .attr("stdDeviation", "4")
-      .attr("result", "blur");
+      mergeFilter
+        .append("feGaussianBlur")
+        .attr("in", "SourceGraphic")
+        .attr("stdDeviation", "4")
+        .attr("result", "blur");
 
-    mergeFilter
-      .append("feColorMatrix")
-      .attr("in", "blur")
-      .attr("type", "matrix")
-      .attr("values", "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7");
+      mergeFilter
+        .append("feColorMatrix")
+        .attr("in", "blur")
+        .attr("type", "matrix")
+        .attr("values", "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7");
 
-    // Draw boundaries
-    boundariesLayer
-      .selectAll("path")
-      .data(nyc.features)
-      .enter()
-      .append("path")
-      .attr("d", path)
-      .attr("class", "borough")
-      .style("fill", "none")
-      .style("stroke", "#9300ff")
-      .style("stroke-width", "1")
-      .style("filter", "url(#glow)");
+      // Draw boundaries
+      boundariesLayer
+        .selectAll("path")
+        .data(nyc.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("class", "borough")
+        .style("fill", "none")
+        .style("stroke", "#9300ff")
+        .style("stroke-width", "1")
+        .style("filter", "url(#glow)");
 
-    // Generate points
-    const pointSim = new PointSimulation(projection, width, height);
-    points = pointSim.generatePoints(nyc.features);
+      // Generate points
+      const pointSim = new PointSimulation(projection, width, height);
+      points = pointSim.generatePoints(nyc.features);
 
-    // Create heat gradient
-    pointSim.createHeatGradient(defs);
+      // Create heat gradient
+      pointSim.createHeatGradient(defs);
 
-    // Draw points
-    pointsLayer
-      .selectAll("circle")
-      .data(points)
-      .enter()
-      .append("circle")
-      .attr("cx", (d) => projection(d.geometry.coordinates)[0])
-      .attr("cy", (d) => projection(d.geometry.coordinates)[1])
-      .attr("r", 8)
-      .style("fill", "#9300ff")
-      .style("opacity", 0.15)
-      .style("mix-blend-mode", "screen")
-      .style("pointer-events", "all")
-      .on("mouseover", function (event, d) {
-        const circle = d3.select(this);
-        const circleBox = circle.node().getBoundingClientRect();
-        const circleX = circleBox.left + circleBox.width / 2;
-        const circleY = circleBox.top + circleBox.height / 2;
+      // Draw points
+      pointsLayer
+        .selectAll("circle")
+        .data(points)
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => projection(d.geometry.coordinates)[0])
+        .attr("cy", (d) => projection(d.geometry.coordinates)[1])
+        .attr("r", 8)
+        .style("fill", "#9300ff")
+        .style("opacity", 0.15)
+        .style("mix-blend-mode", "screen")
+        .style("pointer-events", "all")
+        .on("mouseover", function (event, d) {
+          const circle = d3.select(this);
+          const circleBox = circle.node().getBoundingClientRect();
+          const circleX = circleBox.left + circleBox.width / 2;
+          const circleY = circleBox.top + circleBox.height / 2;
 
-        circle.transition().duration(200).attr("r", 12).style("opacity", 0.3);
+          circle.transition().duration(200).attr("r", 12).style("opacity", 0.3);
 
-        const infoWindow = d3.select(".info-window");
+          const infoWindow = d3.select(".info-window");
 
-        infoWindow.interrupt();
+          infoWindow.interrupt();
 
-        infoWindow
-          .style("opacity", "1")
-          .select(".stat-value")
-          .text(d.properties.value.toFixed(2));
+          infoWindow
+            .style("opacity", "1")
+            .select(".stat-value")
+            .text(d.properties.value.toFixed(2));
 
-        infoWindow.select(".stat-label").text(d.properties.borough);
+          infoWindow.select(".stat-label").text(d.properties.borough);
 
-        infoWindow.selectAll("p").remove(); // 先清除已有的 p 元素
+          infoWindow.selectAll("p").remove(); // 先清除已有的 p 元素
 
-        infoWindow
-          .append("p")
-          .text(`Timestamp: ${d.properties.timestamp.toLocaleTimeString()}`);
+          infoWindow
+            .append("p")
+            .text(`Timestamp: ${d.properties.timestamp.toLocaleTimeString()}`);
 
-        infoWindow
-          .append("p")
-          .text(`Sensor1: ${d.properties.sensor1.toFixed(2)}`);
+          infoWindow
+            .append("p")
+            .text(`Sensor1: ${d.properties.sensor1.toFixed(2)}`);
 
-        const infoWindow_el = document.querySelector(".info-window");
-        const infoRect = infoWindow_el.getBoundingClientRect();
-        const windowX = infoRect.left + infoRect.width / 2;
-        const windowY = infoRect.bottom;
+          const infoWindow_el = document.querySelector(".info-window");
+          const infoRect = infoWindow_el.getBoundingClientRect();
+          const windowX = infoRect.left + infoRect.width / 2;
+          const windowY = infoRect.bottom;
 
-        if (circleY < windowY) {
+          if (circleY < windowY) {
+            verticalLine.style("opacity", 0);
+            connectingLine
+              .attr("x1", windowX)
+              .attr("y1", windowY)
+              .attr("x2", circleX)
+              .attr("y2", circleY)
+              .style("opacity", 0.5);
+          } else {
+            const totalDistance = Math.sqrt(
+              Math.pow(circleX - windowX, 2) + Math.pow(circleY - windowY, 2)
+            );
+            const verticalLength = totalDistance * 0.3;
+
+            verticalLine
+              .attr("x1", windowX)
+              .attr("y1", windowY)
+              .attr("x2", windowX)
+              .attr("y2", windowY + verticalLength)
+              .style("opacity", 0.5);
+
+            connectingLine
+              .attr("x1", windowX)
+              .attr("y1", windowY + verticalLength)
+              .attr("x2", circleX)
+              .attr("y2", circleY)
+              .style("opacity", 0.5);
+          }
+        })
+        .on("mouseout", function () {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("r", 8)
+            .style("opacity", 0.15);
+
           verticalLine.style("opacity", 0);
-          connectingLine
-            .attr("x1", windowX)
-            .attr("y1", windowY)
-            .attr("x2", circleX)
-            .attr("y2", circleY)
-            .style("opacity", 0.5);
-        } else {
-          const totalDistance = Math.sqrt(
-            Math.pow(circleX - windowX, 2) + Math.pow(circleY - windowY, 2)
-          );
-          const verticalLength = totalDistance * 0.3;
+          connectingLine.style("opacity", 0);
 
-          verticalLine
-            .attr("x1", windowX)
-            .attr("y1", windowY)
-            .attr("x2", windowX)
-            .attr("y2", windowY + verticalLength)
-            .style("opacity", 0.5);
+          const infoWindow = d3.select(".info-window");
+          infoWindow
+            .transition()
+            .duration(500)
+            .style("opacity", "0")
+            .end()
+            .then(() => {
+              infoWindow.selectAll("p").remove();
+            });
+        });
 
-          connectingLine
-            .attr("x1", windowX)
-            .attr("y1", windowY + verticalLength)
-            .attr("x2", circleX)
-            .attr("y2", circleY)
-            .style("opacity", 0.5);
-        }
-      })
-      .on("mouseout", function () {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .attr("r", 8)
-          .style("opacity", 0.15);
+      const lineLayer1 = d3
+        .select("body")
+        .append("svg")
+        .style("position", "fixed")
+        .style("top", 0)
+        .style("left", 0)
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("pointer-events", "none")
+        .style("z-index", 899);
 
-        verticalLine.style("opacity", 0);
-        connectingLine.style("opacity", 0);
+      const lineLayer2 = d3
+        .select("body")
+        .append("svg")
+        .style("position", "fixed")
+        .style("top", 0)
+        .style("left", 0)
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("pointer-events", "none")
+        .style("z-index", 899);
 
-        const infoWindow = d3.select(".info-window");
-        infoWindow
-          .transition()
-          .duration(500)
-          .style("opacity", "0")
-          .end()
-          .then(() => {
-            infoWindow.selectAll("p").remove();
-          });
-      });
+      const verticalLine = lineLayer1
+        .append("line")
+        .style("stroke", "#ffffff")
+        .style("stroke-width", "3")
+        .style("stroke-dasharray", "8,6")
+        .style("opacity", 0)
+        .style("filter", "drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))");
 
-    const lineLayer1 = d3
-      .select("body")
-      .append("svg")
-      .style("position", "fixed")
-      .style("top", 0)
-      .style("left", 0)
-      .style("width", "100%")
-      .style("height", "100%")
-      .style("pointer-events", "none")
-      .style("z-index", 899);
+      const connectingLine = lineLayer2
+        .append("line")
+        .style("stroke", "#ffffff")
+        .style("stroke-width", "3")
+        .style("stroke-dasharray", "8,6")
+        .style("opacity", 0)
+        .style("filter", "drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))");
 
-    const lineLayer2 = d3
-      .select("body")
-      .append("svg")
-      .style("position", "fixed")
-      .style("top", 0)
-      .style("left", 0)
-      .style("width", "100%")
-      .style("height", "100%")
-      .style("pointer-events", "none")
-      .style("z-index", 899);
+      // Initialize time control
+      timeControl.initialize();
+      timeControl.updatePointsVisibility();
 
-    const verticalLine = lineLayer1
-      .append("line")
-      .style("stroke", "#ffffff")
-      .style("stroke-width", "3")
-      .style("stroke-dasharray", "8,6")
-      .style("opacity", 0)
-      .style("filter", "drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))");
+      // Hide loading screen when everything is ready
+      const loadingScreen = document.getElementById('loading-screen');
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+      }, 1000); // Wait for fade out animation to complete
 
-    const connectingLine = lineLayer2
-      .append("line")
-      .style("stroke", "#ffffff")
-      .style("stroke-width", "3")
-      .style("stroke-dasharray", "8,6")
-      .style("opacity", 0)
-      .style("filter", "drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))");
+    })
+    .catch(function (error) {
+      console.error("Error loading data:", error);
+      // Show error on loading screen if something goes wrong
+      document.querySelector('.loading-quote').textContent = 'Error loading map data';
+    });
 
-    // Initialize time control
-    timeControl.initialize();
-    timeControl.updatePointsVisibility();
-  });
 } catch (error) {
   console.error("Execution error:", error);
+  // Show error on loading screen if something goes wrong
+  document.querySelector('.loading-quote').textContent = 'Error initializing map';
 }
 
 class PointSimulation {

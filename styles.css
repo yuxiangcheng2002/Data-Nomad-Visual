@@ -584,7 +584,7 @@ body {
   transition: opacity var(--fade-duration) ease; /* 使用统一的过渡时间 */
 }
 
-/* 确保其他元素也使用相同的过渡时间 */
+/* 确其他元素也使用相同的过渡时间 */
 .borough {
   transition: all var(--fade-duration) ease;
 }
@@ -682,4 +682,59 @@ body {
 #play-button.playing {
     background: #9300ff;
     color: white;
+}
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    transition: opacity 1s ease-out;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.loading-quote {
+    color: #9300ff;
+    font-size: clamp(12px, 1.8vw, 20px);
+    margin-bottom: clamp(12px, 2vw, 24px);
+    font-style: italic;
+    max-width: min(600px, 80vw);
+    text-align: center;
+    line-height: 1.8;
+    filter: drop-shadow(0 0 8px rgba(147, 0, 255, 0.8)) 
+            drop-shadow(0 0 20px rgba(147, 0, 255, 0.4));
+}
+
+.loading-dots {
+    color: #9300ff;
+    font-size: clamp(24px, 4vw, 48px);
+    letter-spacing: clamp(6px, 1.2vw, 12px);
+    filter: drop-shadow(0 0 8px rgba(147, 0, 255, 0.8));
+}
+
+.loading-dots .dot {
+    display: inline-block;
+    animation: loadingDot 1.4s infinite ease-in-out;
+}
+
+@keyframes loadingDot {
+    0%, 100% { 
+        opacity: 0.2;
+        transform: translateX(-50%);
+    }
+    50% { 
+        opacity: 1;
+        transform: translateX(50%);
+    }
 }
